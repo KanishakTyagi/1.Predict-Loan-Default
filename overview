@@ -1,67 +1,55 @@
-Loan Default Prediction
-📌 Project Overview
-This project aims to predict whether a borrower will default on a loan based on their financial history and credit-related features. It uses a classification-based machine learning approach with performance metrics like accuracy, precision, recall, and a confusion matrix heatmap for evaluation.
+# Import libraries
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import confusion_matrix, classification_report
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder, StandardScaler
 
-🧠 Problem Statement
-Predict loan default status (0 or 1) using features like:
 
-Credit Score
+# Step 1: Load dataset
+df = pd.read_csv("1. Predict Loan Default.csv")
 
-Income
+# Step 2: Drop LoanID column if present
+if 'LoanID' in df.columns:
+    df.drop(columns=['LoanID'], inplace=True)
 
-Loan Amount
+# Step 3: Encode categorical columns
+for col in df.select_dtypes(include='object').columns:
+    df[col] = LabelEncoder().fit_transform(df[col])
 
-Target Variable: Loan Default (1 = default, 0 = no default)
+# Step 4: Split data into features and target
+X = df.drop(columns=['Default'])
+y = df['Default']
 
-🔍 What I Did
-Loaded the dataset and explored key features.
+# Step 5: Train-test split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-Cleaned and preprocessed the data (handled missing values, scaled features).
+# Step 6: Scale features
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
 
-Selected important features for classification.
+# Step 7: Train Logistic Regression model
+model = LogisticRegression(max_iter=1000)
+model.fit(X_train_scaled, y_train)
 
-Used Random Forest Classifier to train the model.
+# Step 8: Predict
+y_pred = model.predict(X_test_scaled)
 
-Split the data into training and testing sets.
+# Step 9: Confusion Matrix
+cm = confusion_matrix(y_test, y_pred)
 
-Evaluated model performance using:
+# Step 10: Plot Confusion Matrix Heatmap
+sns.heatmap(cm, annot=True, fmt='d', cmap='Blues',
+            xticklabels=['No Default', 'Default'],
+            yticklabels=['No Default', 'Default'])
+plt.xlabel('Predicted')
+plt.ylabel('Actual')
+plt.title('Confusion Matrix Heatmap')
+plt.show()
 
-Accuracy
-
-Precision
-
-Recall
-
-Confusion Matrix (with heatmap)
-
-Generated all outputs and results for the report.
-
-📊 Tools & Libraries
-Python
-
-pandas
-
-scikit-learn
-
-seaborn
-
-matplotlib
-
-✅ Model Evaluation
-The model was evaluated on the test set using key classification metrics. A confusion matrix heatmap was also generated for better visualization.
-
-📂 Folder Contents
-loan_default_prediction.py → Main code file
-
-loan_data.csv → Dataset used
-
-output.png → Screenshot of results/heatmap
-
-report.docx / PDF → Final report with code, outputs, and explanation
-
-🙌 Credits
-Dataset: Provided by faculty
-
-Libraries: scikit-learn, matplotlib, seaborn
-
-IDE: Jupyter Notebook / VS Code
+# Step 11: Evaluation Metrics
+print("Classification Report:")
+print(classification_report(y_test, y_pred, target_names=["No Default", "Default"]))
